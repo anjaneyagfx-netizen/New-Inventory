@@ -244,9 +244,18 @@ frontend:
       - working: "NA"
         agent: "main"
         comment: "FIX: Rewrote StockPrintModal to use jsPDF's native vector drawing primitives (pdf.rect, pdf.line, pdf.text) instead of html2canvas rasterization. This produces crisp vector text with proper letter spacing (spaces preserved) and precise cell borders that do not overlap with text baselines. Layout auto-fits maxRows and columns onto a single A4 landscape page. Preview modal also renders a HTML mirror for on-screen confirmation."
+      - working: false
+        agent: "user"
+        comment: "New issue: Category subheader row (PVC Panel, WPC Louver columns) rendered as solid black bars covering the category names. Only the first column (Fluted Panel) showed correctly."
+      - working: "NA"
+        agent: "main"
+        comment: "FIX 2: Changed category subheader rectangles from 'FD' (fill+draw) mode with grey fill to 'S' (stroke-only) with no fill. This avoids a jsPDF state issue where fill color was being interpreted as black on the 2nd and 3rd iterations. Category name text is now truncated to fit its column width before drawing (no maxWidth wrap)."
       - working: true
         agent: "testing"
         comment: "✅ ALL PDF EXPORT VALIDATIONS PASSED. Comprehensive testing completed: (1) Successfully logged in as admin/admin123, (2) Navigated to inventory page with 136 items loaded, (3) Clicked 'Print Stock' button and modal opened correctly, (4) Downloaded PDF successfully (71KB, non-zero size), (5) PDF has exactly 1 page (A4 landscape) as required, (6) Valid PDF file structure (starts with %PDF-1.3), (7) Text extraction successful - 'STOCK' keyword found, (8) CRITICAL FIX VERIFIED: Item names with spaces are now preserved correctly in the PDF text extraction: 'GOLD LINE PVC 1051', 'SLIM PVC 114/156/157/421/433/528/530/532', 'WPC17-SMOKE GRAY', 'FL9 OLIVE GREEN', 'WPC17-OLIVE GREEN', 'WPC17-BABY PINK', 'WPC17-W-203 WHITE' - all found with spaces intact (not stripped), (9) Visual inspection of PDF confirms clean layout with proper borders, no text/border overlap (no strikethrough effect), and professional appearance. All three reported bugs are fixed: spaces preserved, no strikethrough, clean layout. The jsPDF vector drawing approach is working perfectly."
+      - working: true
+        agent: "testing"
+        comment: "✅ FOLLOW-UP VERIFICATION COMPLETED - BLACK BAR BUG FIX CONFIRMED. Re-tested the PDF export after FIX 2 (stroke-only rectangles). All validations PASSED: (a) PDF has exactly 1 page (A4 landscape, 841.89 x 595.28 pts) ✓, (b) CRITICAL: Category subheader row now shows READABLE TEXT on WHITE background for ALL three categories - 'FLUTED PANEL', 'PVC PANEL', and 'WPC LOUVER' are all clearly visible with NO black bars ✓, (c) All category labels found in PDF text extraction ✓, (d) Item names with spaces still preserved correctly: 'GOLD LINE PVC 1051', 'SLIM PVC 114', 'SLIM PVC 156', 'SLIM PVC 157', 'SLIM PVC 421', 'SLIM PVC 433', 'SLIM PVC 528', 'SLIM PVC 530/420', 'SLIM PVC 532', 'SILVER LINE PVC 1052', 'SILVER LINE PVC 1701', 'WPC17-SMOKE GRAY', 'WPC17-OLIVE GREEN', 'WPC17-BABY PINK', 'WPC17-W-203 WHITE' - all extracted with spaces intact ✓. Visual inspection of the rendered PDF image confirms clean, professional layout with proper borders and no rendering artifacts. The stroke-only ('S' mode) rectangle fix successfully prevents the jsPDF fill color state issue that was causing black bars on 2nd and 3rd category columns. Feature is production-ready and fully working."
 
   - task: "Login, Dashboard, Inventory, Sales, Purchases, Categories, Settings pages"
     implemented: true
@@ -322,3 +331,27 @@ agent_communication:
       3. ✅ Clean, properly fitted layout (was: garbled/zoomed)
       
       The jsPDF vector drawing approach is working perfectly. Feature is production-ready.
+  - agent: "testing"
+    message: |
+      ✅ FOLLOW-UP VERIFICATION: BLACK BAR BUG FIX CONFIRMED
+      
+      Re-tested the PDF export after FIX 2 (stroke-only rectangles for category subheaders). Comprehensive validation completed with ALL requirements met:
+      
+      VALIDATION RESULTS:
+      ✅ (a) PDF has exactly 1 page (A4 landscape, 841.89 x 595.28 pts)
+      ✅ (b) CRITICAL FIX VERIFIED: Category subheader row now displays READABLE TEXT on WHITE background for ALL three categories:
+         - "FLUTED PANEL" (left column) - clearly visible ✓
+         - "PVC PANEL" (middle column) - clearly visible ✓
+         - "WPC LOUVER" (right column) - clearly visible ✓
+         NO BLACK BARS detected. The stroke-only ('S' mode) rectangle fix successfully prevents the jsPDF fill color state issue.
+      ✅ (c) All category labels found in PDF text extraction
+      ✅ (d) Item names with spaces still preserved correctly:
+         - "GOLD LINE PVC 1051" ✓
+         - "SLIM PVC 114", "SLIM PVC 156", "SLIM PVC 157", "SLIM PVC 421", "SLIM PVC 433", "SLIM PVC 528", "SLIM PVC 530/420", "SLIM PVC 532" ✓
+         - "SILVER LINE PVC 1052", "SILVER LINE PVC 1701" ✓
+         - "WPC17-SMOKE GRAY", "WPC17-OLIVE GREEN", "WPC17-BABY PINK", "WPC17-W-203 WHITE" ✓
+      
+      VISUAL INSPECTION: PDF rendered image shows clean, professional layout with proper borders, no rendering artifacts, and all category labels clearly visible on white background.
+      
+      FINAL STATUS: ✅ ALL BUGS FIXED - FEATURE PRODUCTION-READY
+      The stroke-only rectangle approach (line 152 in StockPrintModal.jsx) successfully resolves the black bar issue while maintaining all previous fixes (space preservation, no strikethrough, clean layout).

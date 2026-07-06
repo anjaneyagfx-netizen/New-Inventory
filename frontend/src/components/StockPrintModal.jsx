@@ -139,16 +139,20 @@ const drawStockPdf = (items, warehouseName) => {
     }
   });
 
-  // Draw category subheader row
+  // Draw category subheader row (bordered box with centered text, no fill to avoid black bars)
   const catY = headerY + HDR_H;
   pdf.setFont('helvetica', 'bold');
   pdf.setFontSize(7);
-  pdf.setFillColor(240, 240, 240);
-  pdf.setTextColor(60, 60, 60);
+  pdf.setTextColor(70, 70, 70);
+  pdf.setDrawColor(0, 0, 0);
+  pdf.setLineWidth(0.2);
   groups.forEach((g, gi) => {
     const gw = groupWidths[gi];
-    pdf.rect(groupXs[gi], catY, gw, CAT_H, 'FD');
-    pdf.text(g.name, groupXs[gi] + gw / 2, catY + CAT_H / 2 + 1.1, { align: 'center', maxWidth: gw - 1 });
+    // Stroke-only rect (no fill)
+    pdf.rect(groupXs[gi], catY, gw, CAT_H, 'S');
+    // Truncate long category names to fit
+    const label = truncateToWidth(pdf, g.name, gw - 1.5);
+    pdf.text(label, groupXs[gi] + gw / 2, catY + CAT_H / 2 + 1.1, { align: 'center' });
   });
 
   // Body rows: draw each group independently
