@@ -7,6 +7,7 @@ import api from '../lib/api';
 import { exportInventoryToExcel, downloadBlob, validateInventoryData } from '../lib/excelUtils';
 import Header from '../components/Header';
 import ImagePreviewModal from '../components/ImagePreviewModal';
+import StockPrintModal from '../components/StockPrintModal';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../components/ui/table';
 import { Button } from '../components/ui/button';
@@ -20,7 +21,7 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from '../components/ui/alert-dialog';
-import { Pencil, Trash2, Search, X, Download, Upload, Image as ImageIcon, Loader2 } from 'lucide-react';
+import { Pencil, Trash2, Search, X, Download, Upload, Image as ImageIcon, Loader2, Printer } from 'lucide-react';
 import { toast } from 'sonner';
 
 const fileToDataUrl = (file) => new Promise((resolve, reject) => {
@@ -45,6 +46,7 @@ const InventoryPage = () => {
   const [importing, setImporting] = useState(false);
   const [importResult, setImportResult] = useState({ data: [], errors: [], missingCategories: [] });
   const [isImportOpen, setIsImportOpen] = useState(false);
+  const [isPrintOpen, setIsPrintOpen] = useState(false);
   const [formData, setFormData] = useState({ name: '', category: '', sheets: 0, uMolding: 0, lMolding: 0, image: null });
   const [editingId, setEditingId] = useState(null);
   const [submitting, setSubmitting] = useState(false);
@@ -223,6 +225,8 @@ const InventoryPage = () => {
 
       <ImagePreviewModal isOpen={!!previewImage} onClose={() => setPreviewImage(null)} imageUrl={previewImage?.image} altText={previewImage?.name || ''} />
 
+      <StockPrintModal isOpen={isPrintOpen} onClose={() => setIsPrintOpen(false)} items={items} warehouseName={currentWarehouse?.name} />
+
       <AlertDialog open={!!itemToDelete} onOpenChange={(o) => { if (!o && !isDeleting) setItemToDelete(null); }}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -309,6 +313,7 @@ const InventoryPage = () => {
               <Input value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Search items..." className="pl-9 w-full sm:w-64" />
             </div>
             <Button variant="outline" onClick={handleExport}><Download className="w-4 h-4 mr-2" /> Export to Excel</Button>
+            <Button variant="outline" onClick={() => setIsPrintOpen(true)}><Printer className="w-4 h-4 mr-2" /> Print Stock</Button>
             {canEdit && (
               <>
                 <Button variant="secondary" onClick={() => fileInputRef.current?.click()} disabled={importing}>
