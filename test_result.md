@@ -230,12 +230,30 @@ backend:
         comment: "All user tests passed (5/5): List returns users, Create/Update/Delete work correctly, Non-owner properly gets 403 on /users endpoint. Role-based access control working correctly."
 
 frontend:
-  - task: "Not tested yet - awaiting explicit user permission"
+  - task: "Print Stock PDF export (single A4 landscape page)"
+    implemented: true
+    working: true
+    file: "frontend/src/components/StockPrintModal.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: false
+        agent: "user"
+        comment: "Reported bug: After clicking Download PDF, the resulting PDF was broken - item names had spaces stripped (e.g. 'GOLD LINE PVC 1051' became 'GOLDLINEPVC1051'), text baselines overlapped with row borders creating a strikethrough effect, and layout appeared garbled/zoomed."
+      - working: "NA"
+        agent: "main"
+        comment: "FIX: Rewrote StockPrintModal to use jsPDF's native vector drawing primitives (pdf.rect, pdf.line, pdf.text) instead of html2canvas rasterization. This produces crisp vector text with proper letter spacing (spaces preserved) and precise cell borders that do not overlap with text baselines. Layout auto-fits maxRows and columns onto a single A4 landscape page. Preview modal also renders a HTML mirror for on-screen confirmation."
+      - working: true
+        agent: "testing"
+        comment: "✅ ALL PDF EXPORT VALIDATIONS PASSED. Comprehensive testing completed: (1) Successfully logged in as admin/admin123, (2) Navigated to inventory page with 136 items loaded, (3) Clicked 'Print Stock' button and modal opened correctly, (4) Downloaded PDF successfully (71KB, non-zero size), (5) PDF has exactly 1 page (A4 landscape) as required, (6) Valid PDF file structure (starts with %PDF-1.3), (7) Text extraction successful - 'STOCK' keyword found, (8) CRITICAL FIX VERIFIED: Item names with spaces are now preserved correctly in the PDF text extraction: 'GOLD LINE PVC 1051', 'SLIM PVC 114/156/157/421/433/528/530/532', 'WPC17-SMOKE GRAY', 'FL9 OLIVE GREEN', 'WPC17-OLIVE GREEN', 'WPC17-BABY PINK', 'WPC17-W-203 WHITE' - all found with spaces intact (not stripped), (9) Visual inspection of PDF confirms clean layout with proper borders, no text/border overlap (no strikethrough effect), and professional appearance. All three reported bugs are fixed: spaces preserved, no strikethrough, clean layout. The jsPDF vector drawing approach is working perfectly."
+
+  - task: "Login, Dashboard, Inventory, Sales, Purchases, Categories, Settings pages"
     implemented: true
     working: "NA"
     file: "frontend/src/pages/*.jsx"
     stuck_count: 0
-    priority: "high"
+    priority: "medium"
     needs_retesting: false
 
 metadata:
@@ -278,3 +296,29 @@ agent_communication:
       ✓ Seeded data present (admin/admin123, 2 warehouses, categories, items including AL-1024)
       
       Backend is production-ready. All endpoints tested and working correctly.
+  - agent: "testing"
+    message: |
+      ✅ PDF EXPORT BUG FIX VERIFIED - ALL TESTS PASSED
+      
+      Tested the "Print Stock" PDF export feature on the Inventory page. The fix using jsPDF vector drawing primitives has successfully resolved all three reported bugs:
+      
+      TEST RESULTS:
+      ✅ PDF downloads successfully (71KB, valid PDF structure)
+      ✅ Exactly 1 page (A4 landscape) as required
+      ✅ "STOCK" header present in PDF
+      ✅ CRITICAL: Item names with spaces are now preserved correctly:
+         - "GOLD LINE PVC 1051" ✓
+         - "SLIM PVC 114", "SLIM PVC 156", "SLIM PVC 532" ✓
+         - "WPC17-SMOKE GRAY", "WPC17-OLIVE GREEN", "WPC17-BABY PINK" ✓
+         - "WPC17-W-203 WHITE" ✓
+         All extracted with spaces intact (not stripped like before)
+      ✅ Visual inspection confirms clean layout with proper borders
+      ✅ No text/border overlap (no strikethrough effect)
+      ✅ Professional appearance, properly fitted to single page
+      
+      BUG STATUS: ✅ FIXED
+      1. ✅ Spaces in item names preserved (was: stripped)
+      2. ✅ No text baseline overlap with borders (was: strikethrough effect)
+      3. ✅ Clean, properly fitted layout (was: garbled/zoomed)
+      
+      The jsPDF vector drawing approach is working perfectly. Feature is production-ready.
