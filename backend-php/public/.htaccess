@@ -1,9 +1,0 @@
-# Apache: route everything under /api/ to the single entry point.
-# Place this file inside the /public directory (Apache DocumentRoot should be /public).
-RewriteEngine On
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule ^ index.php [QSA,L]
-
-# Send Authorization header through to PHP (some hosts strip it)
-SetEnvIfNoCase Authorization "(.+)" HTTP_AUTHORIZATION=$1
